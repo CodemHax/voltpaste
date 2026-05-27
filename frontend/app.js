@@ -394,7 +394,24 @@ submitPasteBtn.addEventListener('click', async () => {
             .catch(() => showToast("Paste created! URL: " + finalUrl));
 
         window.history.pushState({}, document.title, `/p/${data.id}${keyHex ? '#' + keyHex : ''}`);
-        routePage();
+        
+
+        const localData = {
+            id: pasteId,
+            title: payload.title,
+            language: payload.language,
+            max_views: payload.max_views,
+            views: 0,
+            expires_at: payload.expires_in_minutes ? new Date(Date.now() + payload.expires_in_minutes * 60000).toISOString() : null,
+            is_encrypted: payload.is_encrypted,
+            content: payload.content,
+            iv: payload.iv,
+            salt: payload.salt,
+            created_at: new Date().toISOString()
+        };
+        
+        showSection(viewSection);
+        loadPaste(pasteId, localData);
 
     } catch (err) {
         console.error(err);
@@ -492,24 +509,29 @@ async function decryptPasswordKey(ciphertextBase64, ivBase64, saltBase64, passwo
     return decoder.decode(decryptedBuffer);
 }
 
-async function loadPaste(pasteId) {
+async function loadPaste(pasteId, localData = null) {
     currentViewPasteId = pasteId;
     unlockContainer.style.display = 'none';
     document.getElementById('viewer-widget').style.display = 'none';
-    viewTitle.textContent = "Fetching paste...";
+    showSection(viewSection);
     
     try {
-        const response = await fetch(`/api/pastes/${pasteId}`);
-        if (!response.ok) {
-            if (response.status === 404) {
-                viewTitle.textContent = "Paste Not Found";
-                displayPlaintext("This paste has expired, been burned, or does not exist.");
-                return;
+        let data;
+        if (localData) {
+            data = localData;
+        } else {
+            const response = await fetch(`/api/pastes/${pasteId}`);
+            if (!response.ok) {
+                if (response.status === 404) {
+                    viewTitle.textContent = "Paste Not Found";
+                    displayPlaintext("This paste has expired, been burned, or does not exist.");
+                    return;
+                }
+                throw new Error("Failed to fetch paste");
             }
-            throw new Error("Failed to fetch paste");
+            data = await response.json();
         }
-
-        const data = await response.json();
+        
         currentPasteData = data;
 
         viewTitle.textContent = data.title || "Untitled Paste";
