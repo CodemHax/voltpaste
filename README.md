@@ -39,8 +39,9 @@ pip install fastapi uvicorn motor pydantic pydantic-settings httpx slowapi
 
 2. Create a `.env` file in the root directory to configure the database:
 ```ini
-MONGODB_URL=mongodb://localhost:27017
-DATABASE_NAME=pastebin
+MONGO_URI=mongodb://localhost:27017
+DB_NAME=pastebin_db
+COLLECTION_NAME=pastes
 ```
 
 3. Start the server:
