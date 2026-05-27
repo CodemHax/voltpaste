@@ -34,7 +34,7 @@ VoltPaste is a high-performance, minimalist, zero-knowledge pastebin application
 
 1. Clone the repository and install dependencies:
 ```bash
-pip install fastapi uvicorn motor pydantic pydantic-settings httpx slowapi
+pip install -r requirements.txt
 ```
 
 2. Create a `.env` file in the root directory to configure the database:
